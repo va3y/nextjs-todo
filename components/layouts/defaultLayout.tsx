@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-export default function Layout({ children }: { children: ReactElement }) {
+export const DefaultLayout = ({ children }: { children: ReactElement }) => {
   return (
     <>
       <div className="flex flex-col h-screen w-screen overflow-y-auto">
@@ -11,4 +11,4 @@ export default function Layout({ children }: { children: ReactElement }) {
       </div>
     </>
   );
-}
+};
