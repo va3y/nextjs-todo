@@ -19,7 +19,7 @@ export const Home = () => {
 
   const addTodoMutation = useMutation(
     (newTodo: string) => {
-      return axios.post("/todos", { data: newTodo });
+      return axios.post("/todos", { title: newTodo });
     },
     {
       onMutate: async (newTodo: string) => {
@@ -29,7 +29,7 @@ export const Home = () => {
         if (previousTodos) {
           queryClient.setQueryData<Todo[]>("all-todos", [
             ...previousTodos,
-            { id: Math.random(), title: newTodo, content: null, done: false, userId: "" },
+            { id: Math.random(), title: newTodo, done: false, userId: "" },
           ]);
         }
         return { previousTodos };
@@ -44,6 +44,35 @@ export const Home = () => {
       },
     }
   );
+
+  const deleteTodoMutation = useMutation(
+    (todoId: number) => {
+      return axios.delete(`/todos/${todoId}`);
+    },
+    {
+      onMutate: async (todoId: number) => {
+        setAddTodoText("");
+        await queryClient.cancelQueries("todos");
+        const previousTodos = queryClient.getQueryData<Todo[]>("all-todos");
+        if (previousTodos) {
+          queryClient.setQueryData<Todo[]>(
+            "all-todos",
+            previousTodos.filter((todo) => todo.id !== todoId)
+          );
+        }
+        return { previousTodos };
+      },
+      onError: (err, variables, context) => {
+        if (context?.previousTodos) {
+          queryClient.setQueryData<Todo[]>("todos", context.previousTodos);
+        }
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries("todos");
+      },
+    }
+  );
+
   return (
     <div>
       <form
@@ -64,7 +93,9 @@ export const Home = () => {
         <Button>Add</Button>
       </form>
       {todosQuery.isSuccess &&
-        todosQuery.data?.map((todo, i) => <TodoItem title={todo.title} key={todo.id} onDelete={() => ({})} />)}
+        todosQuery.data?.map((todo, i) => (
+          <TodoItem todo={todo} key={todo.id} onDelete={(todo) => deleteTodoMutation.mutate(todo.id)} />
+        ))}
     </div>
   );
 };

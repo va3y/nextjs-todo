@@ -11,17 +11,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const session = await getSession({ req });
   if (!session) return res.status(401).send({ message: "Unauthorized" });
 
-  const { title } = req.body;
   if (req.method === "GET") {
-    const userTodos = await prisma.todo.findMany({ where: { userId: session.user.id } });
+    const userTodos = await prisma.todo.findMany({ where: { userId: session.id } });
     return res.status(200).json(userTodos);
   }
+
   if (req.method === "POST") {
-    const result = prisma.todo.create({
+    console.log(req.body);
+    const result = await prisma.todo.create({
       data: {
-        title,
+        title: req.body.title,
         done: false,
-        user: { connect: { id: session.user.id || undefined } },
+        user: { connect: { id: session.id || undefined } },
       },
     });
     res.status(200).json(result);

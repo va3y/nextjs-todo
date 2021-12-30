@@ -1,15 +1,16 @@
+import { Todo } from "@prisma/client";
 import { Button } from "./UI/Button";
 
 export interface TodoItemProps {
-  title: string;
-  onDelete: () => void;
+  todo: Todo;
+  onDelete: (arg: Todo) => void;
 }
 
-export const TodoItem = ({ title, onDelete }: TodoItemProps) => {
+export const TodoItem = ({ todo, onDelete }: TodoItemProps) => {
   return (
     <div className="p-4 border-neutral-200">
-      {title}
-      <Button>Delete</Button>
+      {todo.title}
+      <Button onClick={() => onDelete(todo)}>Delete</Button>
     </div>
   );
 };
